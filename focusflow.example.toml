@@ -1,0 +1,16 @@
+# FocusFlow ML configuration (optional).
+# Copy this file to `focusflow.toml` in the project root and adjust as needed.
+# Relative paths are resolved against the project root.
+# Environment variables override these values:
+#   FOCUSFLOW_DATA_DIR, FOCUSFLOW_DB_PATH, FOCUSFLOW_MODELS_DIR,
+#   FOCUSFLOW_REPORTS_DIR, FOCUSFLOW_DATASET_PATH, FOCUSFLOW_USER_NAME
+
+[paths]
+data_dir = "var"                                   # SQLite database and photos live here
+# db_path = "var/focusflow.db"
+models_dir = "models"
+reports_dir = "reports"
+dataset_path = "data/seed/productivity_synthetic.csv"
+
+[user]
+name = "local-user"

@@ -216,3 +216,25 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ----- FocusFlow ML -----
+
+# Local configuration (copy focusflow.example.toml instead)
+focusflow.toml
+
+# Generated application data (SQLite database and photos)
+*.db
+*.sqlite
+*.sqlite3
+data/photos/
+var/
+
+# Generated ML artifacts and reports
+models/
+reports/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
