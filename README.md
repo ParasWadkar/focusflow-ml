@@ -1,412 +1,1416 @@
 # FocusFlow ML
 
-A local, command-line app for tracking productivity and habits, with a model that predicts a daily productivity score.
+### Intelligent Personal Productivity & Habit Analytics System
 
-FocusFlow ML lets you:
-- track habits
-- plan your day in time blocks
-- keep daily records and a journal
-- review your history
-- estimate a day's **productivity score (0–100)** with classical machine learning
+FocusFlow ML is a local-first, command-line productivity and habit analytics application built with Python. It combines habit tracking, time blocking, daily records, journaling, analytics, and a machine learning pipeline that predicts a daily productivity score from **0 to 100**.
 
-It runs entirely on your machine, needs no GUI and no API keys, and stores everything in SQLite.
+The project was developed as part of the **VITyarthi Build Your Own Project** evaluation for the **Fundamentals of AI & ML** subject.
+
+The project applies fundamental machine learning concepts to a practical problem through a complete end-to-end pipeline covering data preparation, feature engineering, supervised learning, model evaluation, model selection, and prediction.
+
+It runs entirely locally, requires no GUI or external API keys, and uses SQLite for persistent application data.
+
+---
 
 ## Contents
 
-- [Overview](#overview)
-- [Problem being addressed](#problem-being-addressed)
-- [Main features](#main-features)
-- [Architecture overview](#architecture-overview)
-- [Technology stack](#technology-stack)
-- [Project structure](#project-structure)
-- [Installation](#installation)
-- [Quick start](#quick-start)
-- [Database initialisation](#database-initialisation)
-- [Dataset setup](#dataset-setup)
-- [Training, evaluation and prediction](#training-evaluation-and-prediction)
-- [Example CLI usage](#example-cli-usage)
-- [Testing](#testing)
-- [Configuration](#configuration)
-- [Troubleshooting](#troubleshooting)
-- [Limitations and future improvements](#limitations-and-future-improvements)
+* [Overview](#overview)
+* [Problem Statement](#problem-statement)
+* [Objectives](#objectives)
+* [Main Features](#main-features)
+* [AI/ML Concepts](#aiml-concepts-demonstrated)
+* [Architecture](#architecture)
+* [Database Design](#database-design)
+* [Technology Stack](#technology-stack)
+* [Project Structure](#project-structure)
+* [Installation](#installation)
+* [Quick Start](#quick-start)
+* [Database Initialization](#database-initialization)
+* [Dataset](#dataset)
+* [Machine Learning Methodology](#machine-learning-methodology)
+* [Model Selection & Evaluation](#model-selection--evaluation)
+* [Prediction](#prediction)
+* [Example CLI Usage](#example-cli-usage)
+* [Testing](#testing)
+* [Configuration](#configuration)
+* [Troubleshooting](#troubleshooting)
+* [Limitations](#limitations)
+* [Future Enhancements](#future-enhancements)
+* [Academic Context](#academic-context)
 
-## Overview
+---
 
-FocusFlow ML has two parts:
+# Overview
 
-1. **An everyday productivity tool.** It covers habits with streaks, a time-block planner, and structured daily records with a journal and photo references.
-2. **An analytics and ML layer.** It turns those records into statistics, charts, and a supervised regression model that estimates a day's productivity score.
+FocusFlow ML consists of two connected parts.
 
-The ML work is the core of the project:
-- an explicit data-leakage policy
-- a chronological train/test split
-- three candidate models compared with time-series cross-validation
-- held-out evaluation against a baseline
-- persisted models with metadata
-- reproducible results
+### 1. Productivity Management
 
-A **synthetic** seed dataset (1,000 days, clearly labelled as synthetic) lets the pipeline run right after cloning. Real days you log in the app can replace it or be combined with it later.
+The application provides:
 
-## Problem being addressed
+* Habit tracking with schedules and streaks
+* Time-block planning
+* Daily productivity records
+* Journaling
+* Historical record management
+* Local photo references
+* Productivity and activity statistics
 
-Plans, habits, and reflections usually live in separate places. That makes it hard to answer questions like:
-- How much of what I planned did I finish?
-- Which habits am I actually keeping?
-- Given how this morning looks, what kind of day is likely?
+### 2. Analytics & Machine Learning
 
-FocusFlow ML keeps these records in one relational store and analyses them. See [statement.md](statement.md) for the full problem statement, scope, and target users.
+The analytical layer transforms historical records into:
 
-## Main features
+* Productivity statistics
+* Trend reports
+* Visualizations
+* Machine learning datasets
+* Productivity predictions
+* Model evaluation reports
+* Feature importance analysis
 
-| Area | What you can do |
-|---|---|
-| **Habits** | Add, edit, archive, or delete habits; set a schedule (`daily`, `weekdays`, `weekends`); mark any past date done or missed; undo a mark; view the day-by-day history; see completion rates and current and longest streaks |
-| **Time blocks** | Add, edit, complete, delete, and inspect blocks (date, start, end, task, category, priority), with an overlap check. Stats: planned and completed hours, completion ratio, study and deep-work hours, hours by category |
-| **Daily records** | Record sleep, morning energy, mood, exercise, interruptions, a productivity score, and journal text, for today or any past date. Fill a day in gradually and clear fields when needed. Attach local photos |
-| **ML** | Validation → cleaning → feature engineering → chronological split → Linear Regression, Decision Tree, and Random Forest → selection by time-series CV → held-out MAE, RMSE, and R² → persistence → prediction |
-| **Analytics** | Summary, daily, weekly, habit, task, focus, and model views; PNG charts; evaluation reports with actual-vs-predicted, model comparison, feature importance, and residual charts |
+The ML system uses historical productivity-related data to estimate a daily productivity score.
 
-The journal is a plain record and is **not** used as an ML feature. Predictions are statistical estimates from productivity data only. The tool does not interpret emotions or make any psychological or medical judgement.
+The project uses a clearly labelled **synthetic seed dataset containing 1,000 daily records** so that the complete ML pipeline can be reproduced immediately after cloning.
 
-## Architecture overview
+Real records generated through the application can later be used instead of, or together with, the synthetic dataset.
+
+---
+
+# Problem Statement
+
+Students often manage habits, academic activities, tasks, and personal commitments without having a clear understanding of the factors associated with their productivity.
+
+Traditional productivity applications primarily record completed activities but provide limited analysis of historical patterns.
+
+FocusFlow ML combines productivity tracking with machine learning to investigate whether structured information about a day can be used to estimate its productivity score.
+
+The system therefore provides both:
+
+1. A tool for collecting structured productivity data.
+2. A machine learning pipeline for analyzing and predicting productivity.
+
+The complete problem statement, project scope, target users, and high-level features are provided in [`statement.md`](statement.md).
+
+---
+
+# Objectives
+
+The project aims to:
+
+1. Provide a structured system for managing habits.
+2. Allow users to organize activities using time blocks.
+3. Store and edit historical daily records.
+4. Calculate productivity and habit-related statistics.
+5. Prepare historical data for machine learning.
+6. Apply data preprocessing and feature engineering.
+7. Train multiple supervised regression models.
+8. Compare models using standard evaluation metrics.
+9. Select a model using training-period cross-validation.
+10. Predict productivity for new daily records.
+11. Visualize productivity and model performance.
+12. Maintain a reproducible and testable ML workflow.
+
+---
+
+# Main Features
+
+| Area                | Features                                                                                                                                                     |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Habits**          | Add, edit, archive, delete, complete, miss, undo, backfill historical dates, view history, completion rates, current streaks and longest streaks             |
+| **Time Blocks**     | Add, edit, complete, delete and inspect blocks with date, time, task, category and priority; overlapping blocks are rejected                                 |
+| **Daily Records**   | Record sleep, energy, mood, exercise, interruptions, productivity score and journal text                                                                     |
+| **Historical Data** | Enter or modify records for previous dates and gradually complete a day's record                                                                             |
+| **Photos**          | Attach local photo references to daily records                                                                                                               |
+| **ML**              | Validation → cleaning → feature engineering → chronological split → regression models → time-series cross-validation → evaluation → persistence → prediction |
+| **Analytics**       | Summary, daily, weekly, habit, task, focus and model views                                                                                                   |
+| **Visualization**   | Actual vs predicted values, model comparison, feature importance and residual analysis                                                                       |
+| **Testing**         | Automated unit and integration tests covering the database, application services, ML pipeline and CLI                                                        |
+
+The journal is stored as a normal record and is **not used as an ML feature**. The prediction system works only with structured productivity-related data.
+
+---
+
+# AI/ML Concepts Demonstrated
+
+FocusFlow ML demonstrates the following concepts from Fundamentals of AI & ML:
+
+* Supervised learning
+* Regression
+* Dataset preparation
+* Data validation
+* Data cleaning
+* Missing-value handling
+* Feature engineering
+* Categorical feature encoding
+* Training/testing data separation
+* Chronological train/test splitting
+* Time-series cross-validation
+* Model comparison
+* Model selection
+* Baseline comparison
+* Mean Absolute Error (MAE)
+* Root Mean Squared Error (RMSE)
+* R² score
+* Data leakage prevention
+* Feature importance
+* Model persistence
+* Prediction/inference
+
+The project applies these concepts as part of a complete machine learning workflow rather than as isolated demonstrations.
+
+---
+
+# Architecture
+
+The project follows a layered architecture.
 
 ```text
- CLI (src/cli, argparse)          parses input, prints results, maps errors to exit codes
-   │
-   ▼
- Services (habits / planner / journal)   validation + business rules
-   │
-   ▼
- Repositories (src/database)       SQL only; returns plain dicts
-   │
-   ▼
- SQLite (var/focusflow.db)
+                    ┌───────────────────────┐
+                    │       CLI User        │
+                    │      argparse         │
+                    └───────────┬───────────┘
+                                │
+                                ▼
+                    ┌───────────────────────┐
+                    │       Services        │
+                    │ Habits / Planner /    │
+                    │ Journal / Business    │
+                    │ Rules & Validation    │
+                    └───────────┬───────────┘
+                                │
+                                ▼
+                    ┌───────────────────────┐
+                    │     Repositories      │
+                    │     SQL / SQLite      │
+                    └───────────┬───────────┘
+                                │
+                                ▼
+                    ┌───────────────────────┐
+                    │        SQLite         │
+                    │   Persistent Storage   │
+                    └───────────────────────┘
 
- Analytics (src/analytics)  ◄── reads through services / db_extract
- ML (src/ml)                ◄── seed CSV and/or DB extract → pipeline → models/ → predictions
+
+                    ┌───────────────────────┐
+                    │     ML Pipeline       │
+                    ├───────────────────────┤
+                    │ Dataset               │
+                    │ Validation            │
+                    │ Cleaning              │
+                    │ Feature Engineering   │
+                    │ Training              │
+                    │ Cross-Validation      │
+                    │ Evaluation            │
+                    │ Prediction             │
+                    └───────────┬───────────┘
+                                │
+                                ▼
+                    ┌───────────────────────┐
+                    │ Models & Reports      │
+                    │ Joblib / JSON / PNG   │
+                    └───────────────────────┘
 ```
 
-- **Layering.** Each layer depends only on the layers below it.
-- **Errors.** Expected failures raise subclasses of `FocusFlowError`: `ValidationError`, `NotFoundError`, `DuplicateError`, `DatabaseError`, `DataError`, and `ModelError`. The CLI prints them as `Error: …` and exits with code 1; `--debug` shows the traceback. Unexpected errors are not swallowed.
-- **Shared schema.** The ML layer reads real data through `src/ml/db_extract.py`, which produces the same raw daily table as the seed CSV. Training and prediction therefore share one feature-engineering code path.
+### Layering
 
-The leakage policy, pipeline, and current results are documented in [docs/ml_design.md](docs/ml_design.md).
+Each application layer has a specific responsibility:
 
-### Database schema
+* **CLI** — parses commands and displays results.
+* **Services** — implement application logic, validation and business rules.
+* **Repositories** — handle database operations.
+* **Database** — stores persistent application data.
+* **ML layer** — performs dataset processing, training, evaluation and prediction.
+* **Analytics layer** — generates statistics, reports and visualizations.
 
-| Table | Key columns |
-|---|---|
-| `users` | `id` PK, `name` unique |
-| `habits` | `id` PK, `user_id` FK → users, `name` (unique per user), `schedule`, `start_date`, `archived` |
-| `habit_records` | `id` PK, `habit_id` FK → habits (cascade), `date`, `completed`, `note`; unique (`habit_id`, `date`) |
-| `time_blocks` | `id` PK, `user_id` FK, `date`, `start_time`, `end_time`, `task_name`, `category`, `priority` 1–3, `completed`; check `end_time > start_time` |
-| `daily_records` | `id` PK, `user_id` FK, `date`, `sleep_hours`, `energy_level`, `mood_score`, `exercise_minutes`, `interruptions`, `journal`, `productivity_score`; unique (`user_id`, `date`); range checks |
-| `day_photos` | `id` PK, `daily_record_id` FK (cascade), `file_path`, `caption` |
+The ML layer uses the same feature-engineering logic for training and prediction to reduce inconsistencies between the two workflows.
 
-The full DDL is in [src/database/schema.sql](src/database/schema.sql). Foreign keys are enforced, and the schema version is tracked with `PRAGMA user_version`.
+Additional ML design details are documented in [`docs/ml_design.md`](docs/ml_design.md).
 
-## Technology stack
+---
 
-- Python ≥ 3.11 (tested on 3.13)
-- `pandas`, `numpy`: data handling
-- `scikit-learn`: models, pipelines, cross-validation, metrics
-- `matplotlib`: charts (non-interactive `Agg` backend)
-- `joblib`: model persistence
-- `sqlite3` (standard library): application database
-- `argparse` (standard library): CLI
-- `pytest`: tests
+# Database Design
 
-## Project structure
+FocusFlow ML uses SQLite with foreign-key enforcement and schema versioning.
+
+The main tables are:
+
+| Table           | Purpose                                         |
+| --------------- | ----------------------------------------------- |
+| `users`         | Stores the local application user               |
+| `habits`        | Stores habit definitions and schedules          |
+| `habit_records` | Stores daily habit completion records           |
+| `time_blocks`   | Stores planned activities and completion status |
+| `daily_records` | Stores daily productivity-related information   |
+| `day_photos`    | Stores references to locally attached photos    |
+
+The database uses:
+
+* Primary keys
+* Foreign keys
+* Unique constraints
+* Check constraints
+* Cascade deletion where appropriate
+* `PRAGMA user_version` for schema versioning
+
+The complete SQL schema is available in [`src/database/schema.sql`](src/database/schema.sql).
+
+---
+
+# Technology Stack
+
+| Technology           | Purpose                                                |
+| -------------------- | ------------------------------------------------------ |
+| **Python 3.11+**     | Core programming language                              |
+| **Pandas**           | Data manipulation                                      |
+| **NumPy**            | Numerical operations                                   |
+| **Scikit-learn**     | ML models, preprocessing, cross-validation and metrics |
+| **Matplotlib**       | Data visualization                                     |
+| **Joblib**           | Model persistence                                      |
+| **SQLite / sqlite3** | Local database                                         |
+| **argparse**         | Command-line interface                                 |
+| **Pytest**           | Automated testing                                      |
+| **Git**              | Version control                                        |
+
+The application does not require:
+
+* A GPU
+* A web server
+* External APIs
+* API keys
+* A graphical interface
+
+---
+
+# Project Structure
 
 ```text
 focusflow-ml/
-├── README.md                  this file
-├── statement.md               problem statement, scope, users, features
+│
+├── README.md
+├── statement.md
 ├── requirements.txt
-├── focusflow.example.toml     optional configuration template
+├── .gitignore
 ├── pytest.ini
-├── data/seed/
-│   ├── productivity_synthetic.csv   SYNTHETIC seed dataset (1,000 days, seed 42)
-│   └── README.md                    how it was generated, column dictionary
-├── docs/ml_design.md          leakage policy, pipeline, results
+├── focusflow.example.toml
+│
+├── data/
+│   └── seed/
+│       ├── productivity_synthetic.csv
+│       └── README.md
+│
+├── docs/
+│   └── ml_design.md
+│
 ├── src/
-│   ├── main.py                entry point: python -m src.main
-│   ├── config.py              path/user settings (defaults < focusflow.toml < env vars)
-│   ├── demo.py                opt-in synthetic demo history for an empty DB
-│   ├── cli/                   parser + one module per command group
-│   ├── database/              schema.sql, connection handling, repositories
-│   ├── habits/                models, service, streak calculations
-│   ├── planner/               time-block models, service, statistics
-│   ├── journal/               daily-record models, service, photo storage
-│   ├── analytics/             reports (tables) and charts (matplotlib)
-│   ├── ml/                    dataset, validation, cleaning, features, training,
-│   │                          selection, evaluation, persistence, prediction,
-│   │                          pipeline, report, db_extract
-│   └── utils/                 errors, validators, dates, text formatting
-└── tests/                     pytest suite (114 tests)
+│   ├── main.py
+│   ├── config.py
+│   ├── demo.py
+│   │
+│   ├── cli/
+│   │   └── command handlers and parser
+│   │
+│   ├── database/
+│   │   ├── connection.py
+│   │   ├── schema.sql
+│   │   └── repositories.py
+│   │
+│   ├── habits/
+│   │   ├── models.py
+│   │   ├── service.py
+│   │   └── streaks.py
+│   │
+│   ├── planner/
+│   │   ├── models.py
+│   │   ├── service.py
+│   │   └── stats.py
+│   │
+│   ├── journal/
+│   │   ├── models.py
+│   │   ├── service.py
+│   │   └── photos.py
+│   │
+│   ├── analytics/
+│   │   ├── reports.py
+│   │   └── charts.py
+│   │
+│   ├── ml/
+│   │   ├── dataset.py
+│   │   ├── db_extract.py
+│   │   ├── validation.py
+│   │   ├── cleaning.py
+│   │   ├── features.py
+│   │   ├── training.py
+│   │   ├── selection.py
+│   │   ├── evaluation.py
+│   │   ├── persistence.py
+│   │   ├── prediction.py
+│   │   ├── pipeline.py
+│   │   └── report.py
+│   │
+│   └── utils/
+│       ├── errors.py
+│       ├── dates.py
+│       ├── validators.py
+│       └── formatting.py
+│
+├── tests/
+│   ├── conftest.py
+│   ├── test_database.py
+│   ├── test_habits.py
+│   ├── test_planner.py
+│   ├── test_journal.py
+│   ├── test_features.py
+│   ├── test_ml_pipeline.py
+│   ├── test_prediction.py
+│   └── test_cli.py
+│
+├── models/
+└── reports/
 ```
 
-The following are created at runtime and are git-ignored: `var/` (database and photos), `models/` (trained models), and `reports/` (metrics and charts).
+The following directories are generated at runtime and excluded from version control:
 
-## Installation
+```text
+var/
+models/
+reports/
+```
 
-**Requirements:** Python 3.11 or newer, and `git`.
+---
+
+# Installation
+
+## Requirements
+
+* Python **3.11 or newer**
+* Git
+* pip
+
+Python 3.11 and Python 3.13 have been used to verify the project.
+
+---
+
+## Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/ParasWadkar/focusflow-ml.git
 cd focusflow-ml
 ```
 
-Create and activate a virtual environment:
+---
 
-```bash
+## Create a Virtual Environment
+
+### Windows PowerShell
+
+```powershell
 python -m venv .venv
+.venv\Scripts\Activate.ps1
 ```
 
-- **Windows (PowerShell):** `.venv\Scripts\Activate.ps1`
-- **Windows (cmd):** `.venv\Scripts\activate.bat`
-- **macOS/Linux:** `source .venv/bin/activate`
+### Windows Command Prompt
 
-Install the dependencies:
+```cmd
+python -m venv .venv
+.venv\Scripts\activate.bat
+```
+
+### macOS/Linux
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+---
+
+## Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-All commands below assume the environment is active and that you are in the project root.
+All commands below should be executed from the project root with the virtual environment activated.
 
-## Quick start
+---
+
+# Quick Start
+
+Initialize the application:
 
 ```bash
 python -m src.main init
+```
+
+Train the ML models:
+
+```bash
 python -m src.main train
+```
+
+Evaluate the trained models:
+
+```bash
 python -m src.main evaluate
+```
+
+Make a planning prediction:
+
+```bash
 python -m src.main predict --sleep 7.5 --energy 7 --planned-hours 6 --habits-planned 4
 ```
 
-On a fresh database, `predict` has nothing to read yet, so you supply the morning inputs as flags. In an interactive terminal, a bare `python -m src.main predict` asks for them instead.
+---
 
-To try the application with example history, start from an **empty** database with demo data:
+# Database Initialization
 
-```bash
-python -m src.main init --demo-data
-python -m src.main train
-python -m src.main evaluate
-python -m src.main predict
-python -m src.main analytics --plot
-```
-
-`--demo-data` writes 60 past days plus today of **synthetic** habits, time blocks, and daily records, using the normal services. Demo journal entries are marked `[demo]`. It refuses to run on a database that already contains data. To start over, delete `var/focusflow.db` and run `init` again.
-
-## Database initialisation
+Run:
 
 ```bash
 python -m src.main init
 ```
 
-This command:
-- creates `var/`, `models/`, and `reports/`
-- creates the SQLite schema and a default local user
-- generates the seed dataset if the file is missing
+This:
 
-Running it again is safe. Every other database command fails with a clear message until `init` has been run.
+* Creates the required runtime directories.
+* Creates the SQLite database.
+* Creates the database schema.
+* Creates a default local user.
+* Generates the seed dataset if it does not exist.
 
-## Dataset setup
+Initialization is safe to run repeatedly.
 
-The repository ships with `data/seed/productivity_synthetic.csv`.
+---
 
-> **The seed dataset is synthetic.** It was generated by `src/ml/dataset.py`, not collected from people. See [data/seed/README.md](data/seed/README.md) for the generation process and column definitions.
+## Demo Data
+
+To populate an empty database with demonstration history:
 
 ```bash
-python -m src.main dataset info                          # shape, date range, summary statistics
-python -m src.main dataset validate                      # structural checks and warnings
-python -m src.main dataset generate --force              # regenerate (identical for seed 42)
+python -m src.main init --demo-data
+```
+
+The demo database contains approximately 60 days of synthetic history.
+
+Demo records are clearly labelled as synthetic/demo data.
+
+`--demo-data` can only be used with an empty database.
+
+---
+
+# Dataset
+
+The repository includes:
+
+```text
+data/seed/productivity_synthetic.csv
+```
+
+### Important
+
+**The seed dataset is synthetic.**
+
+It was generated by the project itself and was not collected from real people.
+
+The dataset contains **1,000 daily records** and is generated deterministically using **random seed 42**.
+
+The dataset generation process is documented in:
+
+[`data/seed/README.md`](data/seed/README.md)
+
+---
+
+## Dataset Commands
+
+View dataset information:
+
+```bash
+python -m src.main dataset info
+```
+
+Validate the dataset:
+
+```bash
+python -m src.main dataset validate
+```
+
+Regenerate the dataset:
+
+```bash
+python -m src.main dataset generate --force
+```
+
+Generate an alternative dataset:
+
+```bash
 python -m src.main dataset generate --rows 2000 --seed 7 --output data/seed/alt.csv
 ```
 
-To use your own logged days, keep recording daily scores (`day record --score …`) and then train with `--source db` (needs at least 60 scored days) or `--source combined` (seed plus your days).
+With seed 42, regeneration is deterministic.
 
-## Training, evaluation and prediction
+---
 
-### Train
+# Machine Learning Methodology
 
-```bash
-python -m src.main train                                   # both models, seed data
-python -m src.main train --mode planning                   # one model only
-python -m src.main train --source combined                 # seed + your logged days
+## Problem Formulation
+
+Productivity prediction is treated as a **supervised regression problem**.
+
+The input consists of productivity-related features:
+
+```text
+X = [x1, x2, ..., xn]
 ```
 
-- **Models.** Two models are trained:
-  - **planning**: uses only information known at the start of the day. `predict` uses it by default.
-  - **retrospective**: also uses information known only after the day ends (completed hours, habits completed, mood, interruptions, exercise). It is for analysis only.
-- **Candidates.** For each model, Linear Regression, a Decision Tree, and a Random Forest are trained on the earliest 80% of dates.
-- **Selection.** The candidate with the lowest mean RMSE in 5-fold time-series cross-validation on that training period is selected. The held-out test period (the latest 20%) is never used for the choice.
-- **Output.** A table of CV and test metrics, next to a baseline that always predicts the training mean. Models are saved to `models/<mode>_model.joblib` with `models/<mode>_metadata.json`.
+and the target is:
 
-Current results on the seed data (test period 2025-03-13 to 2025-09-27, 199 days):
+```text
+y = productivity score
+```
 
-| Model | Planning test MAE / RMSE / R² | Retrospective test MAE / RMSE / R² |
-|---|---|---|
-| Linear Regression | **7.06 / 9.05 / 0.750** (selected) | **3.94 / 5.02 / 0.923** (selected) |
-| Decision Tree | 7.33 / 9.38 / 0.732 | 6.44 / 7.80 / 0.814 |
-| Random Forest | 6.81 / 8.72 / 0.768 | 4.46 / 5.67 / 0.902 |
-| Mean baseline | 14.36 / 18.11 / −0.000 | 14.36 / 18.11 / −0.000 |
+where:
 
-For the planning model, Random Forest is slightly better on the test period, but Linear Regression won cross-validation, which is the documented selection rule. Planning predictions are less precise than retrospective ones, as expected. These figures come from **synthetic** data. [docs/ml_design.md](docs/ml_design.md) discusses them in detail.
+```text
+0 ≤ y ≤ 100
+```
 
-### Evaluate
+The model learns:
+
+```text
+f(X) → y
+```
+
+---
+
+# Feature Engineering
+
+Features are derived from the application's structured records.
+
+Examples include:
+
+* Sleep duration
+* Energy level
+* Planned habits
+* Habit completion rate
+* Planned task hours
+* Planned study hours
+* Planned deep-work hours
+* Completed task hours
+* Study hours
+* Deep-work hours
+* Exercise duration
+* Mood
+* Interruptions
+* Day of week
+* Weekend indicator
+* Previous productivity
+* Rolling seven-day productivity
+
+Lagged and rolling features are calculated so that information from the current target day is not accidentally included.
+
+---
+
+# Planning vs Retrospective Models
+
+FocusFlow ML maintains two separate feature sets.
+
+## Planning Model
+
+The planning model is used for the default prediction.
+
+It uses information that can be available at the beginning of the day, including:
+
+* Previous night's sleep
+* Morning energy
+* Planned habits
+* Planned task hours
+* Planned study hours
+* Planned deep-work hours
+* Day of week
+* Weekend indicator
+* Previous productivity
+* Previous habit completion
+* Previous seven-day productivity
+
+## Retrospective Model
+
+The retrospective model is intended for analyzing completed days.
+
+It additionally uses information that becomes available after the day ends, such as:
+
+* Completed habits
+* Habit completion rate
+* Completed task hours
+* Task completion ratio
+* Actual study hours
+* Actual deep-work hours
+* Exercise
+* Mood
+* Interruptions
+
+The retrospective model is not used as the default morning prediction model.
+
+---
+
+# Data Leakage Prevention
+
+Data leakage is explicitly addressed in the ML pipeline.
+
+The current day's target productivity score is never used as an input feature for predicting that same score.
+
+The dataset is split chronologically rather than randomly:
+
+```text
+Earliest 80% of dates → Training
+Latest 20% of dates   → Testing
+```
+
+This is important because the feature set contains historical and lagged information.
+
+The project also includes automated leakage tests and shuffled-target sanity checks.
+
+When the target is randomly shuffled, predictive performance drops substantially, helping verify that the model is not receiving hidden information about the target.
+
+---
+
+# Training Pipeline
+
+The complete pipeline is:
+
+```text
+Load Dataset
+     ↓
+Validate
+     ↓
+Clean
+     ↓
+Feature Engineering
+     ↓
+Chronological Train/Test Split
+     ↓
+Preprocessing
+     ↓
+Train Candidate Models
+     ↓
+Time-Series Cross-Validation
+     ↓
+Select Model
+     ↓
+Evaluate on Held-Out Test Set
+     ↓
+Persist Model + Metadata
+     ↓
+Prediction
+```
+
+Missing numerical values are handled inside the machine-learning preprocessing pipeline so that preprocessing parameters are learned from the training data only.
+
+---
+
+# Models
+
+Three classical regression algorithms are compared:
+
+### Linear Regression
+
+Provides a simple and interpretable regression model.
+
+### Decision Tree Regressor
+
+Captures nonlinear relationships through decision rules.
+
+### Random Forest Regressor
+
+Combines multiple decision trees to model more complex relationships.
+
+All models are trained using reproducible settings.
+
+---
+
+# Model Selection
+
+Candidate models are evaluated using **5-fold TimeSeriesSplit cross-validation** on the training period.
+
+The model with the lowest mean cross-validation RMSE is selected.
+
+The held-out test period is **never used for model selection**.
+
+This keeps the final test set independent from the model-selection process.
+
+---
+
+# Evaluation Metrics
+
+The project evaluates models using:
+
+### MAE
+
+Mean Absolute Error measures the average absolute prediction error.
+
+$$
+MAE =
+\frac{1}{n}
+\sum_{i=1}^{n}
+|y_i-\hat{y_i}|
+$$
+
+### RMSE
+
+Root Mean Squared Error gives larger errors greater influence.
+
+$$
+RMSE =
+\sqrt{
+\frac{1}{n}
+\sum_{i=1}^{n}
+(y_i-\hat{y_i})^2
+}
+$$
+
+### R²
+
+R² measures the amount of target variation explained by the model relative to a baseline.
+
+$$
+R^2 =
+1-\frac{SS_{res}}{SS_{tot}}
+$$
+
+---
+
+# Baseline
+
+The ML models are compared against a simple baseline that always predicts the **mean productivity score of the training data**.
+
+This establishes whether the trained models improve upon a simple non-ML prediction strategy.
+
+---
+
+# Current Model Results
+
+The following results were obtained from the included synthetic dataset.
+
+Test period:
+
+```text
+2025-03-13 → 2025-09-27
+199 days
+```
+
+| Model                 | Planning MAE | Planning RMSE | Planning R² | Retrospective MAE | Retrospective RMSE | Retrospective R² |
+| --------------------- | -----------: | ------------: | ----------: | ----------------: | -----------------: | ---------------: |
+| **Linear Regression** |     **7.06** |      **9.05** |   **0.750** |          **3.94** |           **5.02** |        **0.923** |
+| Decision Tree         |         7.33 |          9.38 |       0.732 |              6.44 |               7.80 |            0.814 |
+| Random Forest         |         6.81 |          8.72 |       0.768 |              4.46 |               5.67 |            0.902 |
+| Mean Baseline         |        14.36 |         18.11 |      ~0.000 |             14.36 |              18.11 |           ~0.000 |
+
+The model-selection procedure selected **Linear Regression** for both modes because it achieved the best cross-validation result on the training period.
+
+Although Random Forest produced a slightly better score on the planning test period, the test set was not used to select the model.
+
+These results come from synthetic data and therefore demonstrate the behavior of the implemented pipeline rather than real-world predictive accuracy.
+
+---
+
+# Training Commands
+
+Train both models using the seed dataset:
+
+```bash
+python -m src.main train
+```
+
+Train only the planning model:
+
+```bash
+python -m src.main train --mode planning
+```
+
+Train only the retrospective model:
+
+```bash
+python -m src.main train --mode retrospective
+```
+
+Train using logged database records:
+
+```bash
+python -m src.main train --source db
+```
+
+Train using both seed and logged data:
+
+```bash
+python -m src.main train --source combined
+```
+
+Training from database records requires a sufficient number of usable scored days.
+
+---
+
+# Evaluation
+
+Run:
 
 ```bash
 python -m src.main evaluate
 ```
 
-This loads the saved models, rebuilds exactly the same chronological split, and writes the following to `reports/`:
-- `metrics_<mode>.json` and `evaluation_<mode>.md`
-- `<mode>_actual_vs_predicted.png`
-- `<mode>_model_comparison.png`
-- `<mode>_residuals.png`
-- `<mode>_test_timeline.png`
-- `<mode>_feature_importance_<model>.png` for each model (impurity-based importance for trees, |standardised coefficient| for linear regression)
+The evaluation process:
 
-It also prints residual statistics and the top features. If the dataset has changed since training, it warns you.
+1. Loads the persisted model.
+2. Reconstructs the same chronological split.
+3. Recomputes the evaluation metrics.
+4. Generates evaluation reports.
+5. Generates visualization charts.
+6. Checks whether the dataset has changed since training.
 
-### Predict
+Generated files include:
 
-```bash
-python -m src.main predict                                  # today, using database inputs
-python -m src.main predict --date 2026-09-18 --sleep 6.5 --energy 5 --planned-hours 7 --habits-planned 5
-python -m src.main predict --mode retrospective --date 2026-09-16
+```text
+reports/
+├── metrics_<mode>.json
+├── evaluation_<mode>.md
+├── <mode>_actual_vs_predicted.png
+├── <mode>_model_comparison.png
+├── <mode>_residuals.png
+├── <mode>_test_timeline.png
+└── <mode>_feature_importance_<model>.png
 ```
 
-`predict` builds its inputs from the database:
-- that day's sleep and energy (`day record`)
-- planned blocks (`block add`)
-- scheduled habits
-- the previous days' scores
+---
 
-Flags fill in or override any of these. Planning predictions require four inputs: sleep, energy, planned hours, and habits planned. If one is missing, the error names the flag that supplies it. If there is no score history yet, lag features fall back to training medians, and the output says so.
+# Prediction
 
-The output shows the score, the model used, its typical error (test MAE), and every input used.
-
-## Example CLI usage
-
-Every command has `--help`, for example `python -m src.main block add --help`.
+The default prediction command is:
 
 ```bash
-# Habits
+python -m src.main predict
+```
+
+A specific date can be supplied:
+
+```bash
+python -m src.main predict --date 2026-09-18
+```
+
+Inputs can also be supplied directly:
+
+```bash
+python -m src.main predict \
+    --sleep 6.5 \
+    --energy 5 \
+    --planned-hours 7 \
+    --habits-planned 5
+```
+
+The prediction system obtains available information from the database, including:
+
+* Sleep
+* Energy
+* Planned time blocks
+* Scheduled habits
+* Previous productivity history
+
+Command-line arguments can fill or override missing values.
+
+The prediction output includes:
+
+* Predicted productivity score
+* Model used
+* Typical model error based on test MAE
+* Inputs used for the prediction
+
+Predictions are constrained to the valid range:
+
+```text
+0–100
+```
+
+---
+
+# Example CLI Usage
+
+Every command provides help information.
+
+```bash
+python -m src.main --help
+```
+
+## Habits
+
+Add a daily habit:
+
+```bash
 python -m src.main habit add "Read 20 pages" --schedule daily --start-date 2026-09-01
+```
+
+Add a weekday habit:
+
+```bash
 python -m src.main habit add "Review flashcards" --schedule weekdays
-python -m src.main habit done "Read 20 pages"                       # today
-python -m src.main habit done "Read 20 pages" --date 2026-09-14     # backfill
+```
+
+Mark a habit complete:
+
+```bash
+python -m src.main habit done "Read 20 pages"
+```
+
+Backfill a previous date:
+
+```bash
+python -m src.main habit done "Read 20 pages" --date 2026-09-14
+```
+
+Mark a habit missed:
+
+```bash
 python -m src.main habit missed "Read 20 pages" --date 2026-09-15
+```
+
+Undo a record:
+
+```bash
 python -m src.main habit undo "Read 20 pages" --date 2026-09-15
+```
+
+View history:
+
+```bash
 python -m src.main habit history "Read 20 pages" --from 2026-09-01
+```
+
+View statistics:
+
+```bash
 python -m src.main habit stats
-python -m src.main habit edit "Read 20 pages" --name "Read 30 pages"
-python -m src.main habit delete "Read 30 pages" --yes
+```
 
-# Time blocks
+---
+
+## Time Blocks
+
+Add a deep-work block:
+
+```bash
 python -m src.main block add "Thesis chapter 3" --start 09:00 --end 11:00 --category deep_work --priority 1
+```
+
+Add a study block:
+
+```bash
 python -m src.main block add "Linear algebra" --date 2026-09-18 --start 14:00 --end 15:30 --category study
+```
+
+List blocks:
+
+```bash
 python -m src.main block list --from 2026-09-14 --to 2026-09-20
+```
+
+Complete a block:
+
+```bash
 python -m src.main block done 1
-python -m src.main block edit 2 --end 16:00
-python -m src.main block show 2
+```
+
+View statistics:
+
+```bash
 python -m src.main block stats --from 2026-09-01
-python -m src.main block delete 2 --yes
+```
 
-# Daily records and journal
-python -m src.main day record --sleep 7.5 --energy 7                 # morning
-python -m src.main day record --mood 6 --exercise 30 --interruptions 4 --score 72 --journal "Good focus."
-python -m src.main day record --date 2026-09-10 --score 55           # fix a past day
+---
+
+## Daily Records
+
+Record morning information:
+
+```bash
+python -m src.main day record --sleep 7.5 --energy 7
+```
+
+Update the day's record:
+
+```bash
+python -m src.main day record \
+    --mood 6 \
+    --exercise 30 \
+    --interruptions 4 \
+    --score 72 \
+    --journal "Good focus."
+```
+
+Update a previous date:
+
+```bash
+python -m src.main day record --date 2026-09-10 --score 55
+```
+
+Load journal text from a file:
+
+```bash
 python -m src.main day record --journal-file notes.txt
-python -m src.main day record --clear mood_score
-python -m src.main day photo-add ./walk.jpg --caption "Evening walk"
-python -m src.main day show --date 2026-09-10
-python -m src.main day list --from 2026-09-01
+```
 
-# Analytics
-python -m src.main analytics                        # summary of the last 30 days
+Attach a photo:
+
+```bash
+python -m src.main day photo-add ./walk.jpg --caption "Evening walk"
+```
+
+View a day:
+
+```bash
+python -m src.main day show --date 2026-09-10
+```
+
+---
+
+## Analytics
+
+View the summary:
+
+```bash
+python -m src.main analytics
+```
+
+Generate weekly analytics:
+
+```bash
 python -m src.main analytics weekly --from 2026-08-01 --plot
+```
+
+View habit analytics:
+
+```bash
 python -m src.main analytics habits --plot
+```
+
+View task analytics:
+
+```bash
 python -m src.main analytics tasks
+```
+
+View focus analytics:
+
+```bash
 python -m src.main analytics focus
+```
+
+View ML model analytics:
+
+```bash
 python -m src.main analytics model
 ```
 
-- **Categories:** `study`, `deep_work`, `work`, `exercise`, `admin`, `personal`, `other`.
-- **Priorities:** 1 (high), 2 (medium), 3 (low).
-- **Time blocks** must start and end on the same day and cannot overlap.
-- **Destructive commands** ask for confirmation in a terminal. In scripts, they require `--yes`.
+---
 
-## Testing
+# Testing
+
+Run the complete test suite:
 
 ```bash
 python -m pytest
 ```
 
-The suite has 114 tests and runs in about 30 seconds. It covers:
-- **Database:** schema, constraints, cascades, and settings
-- **Habits:** creation, validation, completion and backfilling, rates, and streaks
-- **Time blocks:** validation, overlaps, editing, and statistics
-- **Journal:** records, validation, and photos
-- **Features:** leakage guard, lags and calendar gaps, validation, cleaning, generator properties, and chronological split
-- **ML pipeline:** training artifacts, CV-based selection, baseline comparison, evaluation reproducibility, reports, and determinism
-- **Prediction:** history usage, hiding the target day's outcome, missing inputs, and corrupted, truncated, or wrong-format model files
-- **CLI end to end:** init, CRUD commands, error messages, demo data, train/evaluate/predict, and every analytics view
+The current implementation contains **114 automated tests**.
 
-## Configuration
+The tests cover:
 
-No configuration is needed. By default, all paths are relative to the project root.
+### Database
 
-To change them, either:
-- copy `focusflow.example.toml` to `focusflow.toml` (git-ignored) and edit it, or
-- set environment variables, which take precedence:
+* Schema
+* Constraints
+* Foreign keys
+* Cascades
+* Database settings
 
-| Variable | Default |
-|---|---|
-| `FOCUSFLOW_DATA_DIR` | `var` |
-| `FOCUSFLOW_DB_PATH` | `<data_dir>/focusflow.db` |
-| `FOCUSFLOW_MODELS_DIR` | `models` |
-| `FOCUSFLOW_REPORTS_DIR` | `reports` |
+### Habits
+
+* Creation
+* Validation
+* Completion
+* Historical backfilling
+* Completion rates
+* Streak calculations
+
+### Time Blocks
+
+* Validation
+* Overlap detection
+* Editing
+* Completion
+* Statistics
+
+### Journal
+
+* Daily records
+* Validation
+* Historical records
+* Photo handling
+
+### Machine Learning
+
+* Dataset generation
+* Dataset validation
+* Cleaning
+* Feature engineering
+* Leakage prevention
+* Lag features
+* Chronological splitting
+* Model training
+* Cross-validation
+* Baseline comparison
+* Evaluation reproducibility
+* Model persistence
+* Determinism
+
+### Prediction
+
+* Historical feature usage
+* Target-day leakage prevention
+* Missing inputs
+* Invalid model files
+* Prediction behavior
+
+### CLI
+
+* Initialization
+* CRUD operations
+* Error handling
+* Demo data
+* Training
+* Evaluation
+* Prediction
+* Analytics
+
+The complete suite has been verified on Python 3.11 and Python 3.13.
+
+---
+
+# Configuration
+
+No configuration is required for normal use.
+
+By default, paths are relative to the project root.
+
+Optional configuration can be created by copying:
+
+```text
+focusflow.example.toml
+```
+
+to:
+
+```text
+focusflow.toml
+```
+
+The local configuration file is ignored by Git.
+
+Environment variables take precedence over the configuration file.
+
+| Variable                 | Default                                |
+| ------------------------ | -------------------------------------- |
+| `FOCUSFLOW_DATA_DIR`     | `var`                                  |
+| `FOCUSFLOW_DB_PATH`      | `<data_dir>/focusflow.db`              |
+| `FOCUSFLOW_MODELS_DIR`   | `models`                               |
+| `FOCUSFLOW_REPORTS_DIR`  | `reports`                              |
 | `FOCUSFLOW_DATASET_PATH` | `data/seed/productivity_synthetic.csv` |
-| `FOCUSFLOW_USER_NAME` | `local-user` |
+| `FOCUSFLOW_USER_NAME`    | `local-user`                           |
 
-No credentials or API keys are used anywhere.
+No credentials or API keys are required.
 
-## Troubleshooting
+---
 
-| Symptom | Fix |
-|---|---|
-| `Error: Database not found … Run python -m src.main init first.` | Run `python -m src.main init`. |
-| `No module named sklearn` / `pandas` | Activate the virtual environment and run `pip install -r requirements.txt`. |
-| `No module named src` | Run commands from the project root, using `python -m src.main …` (not `python src/main.py`). |
-| `No trained planning model found` | Run `python -m src.main train`. |
-| `Model file … is corrupted or unreadable` or a scikit-learn version warning | Delete `models/` and run `train` again. Models are not portable across scikit-learn versions. |
-| `Missing required input(s) … sleep_hours (--sleep)` | Record the day (`day record --sleep … --energy …`, `block add …`) or pass the named flags. |
-| `The database has only N day(s) with a productivity score` | Keep logging scores, or train with `--source combined`. |
-| `This action needs confirmation; re-run with --yes` | Non-interactive shells need `--yes` for deletions. |
-| `Demo data can only be added to an empty database` | Delete `var/focusflow.db` (this erases your data), then run `init --demo-data`. |
-| `Dataset not found` | Run `python -m src.main dataset generate` (or `init`). |
-| `Block overlaps existing block` | Pick a free slot, or edit or delete the existing block. |
-| Symbols look garbled in an old Windows console | Output is plain text; use Windows Terminal or set `PYTHONIOENCODING=utf-8`. |
+# Error Handling
 
-## Limitations and future improvements
+The application uses structured errors including:
 
-**Current limitations**
+* `ValidationError`
+* `NotFoundError`
+* `DuplicateError`
+* `DatabaseError`
+* `DataError`
+* `ModelError`
 
-- The shipped model is trained on **synthetic** data. Its metrics show that the pipeline works; they do not measure real-world accuracy.
-- Only one local user is exposed in the CLI.
-- Time blocks cannot span midnight.
-- Hyperparameters are fixed rather than tuned.
-- Uncertainty is shown only as the test MAE, not as per-prediction intervals.
-- The productivity score is self-reported, so real-data models learn the user's own scoring habits.
+Expected application errors are displayed clearly by the CLI and return an appropriate error exit code.
 
-**Possible next steps**
+Unexpected exceptions are not silently ignored.
 
-- Hyperparameter search with nested time-series cross-validation, plus gradient-boosted trees.
-- Prediction intervals (for example, quantile regression or conformal prediction).
-- Permutation importance and partial-dependence plots.
-- Recurring time-block templates and weekly habit targets.
-- CSV import and export of logged data.
-- An optional lightweight local web UI on top of the existing service layer.
+A debug option can be used to display detailed traceback information.
+
+---
+
+# Troubleshooting
+
+| Problem                                   | Solution                                                                   |
+| ----------------------------------------- | -------------------------------------------------------------------------- |
+| Database not found                        | Run `python -m src.main init`                                              |
+| Missing `sklearn` or `pandas`             | Activate the virtual environment and run `pip install -r requirements.txt` |
+| `No module named src`                     | Run commands from the project root using `python -m src.main`              |
+| No trained model                          | Run `python -m src.main train`                                             |
+| Corrupted/incompatible model              | Remove the generated `models/` directory and retrain                       |
+| Missing prediction inputs                 | Record the required information or supply the flags shown in the error     |
+| Insufficient scored days                  | Continue recording productivity scores or use the seed/combined dataset    |
+| Destructive command requires confirmation | Use `--yes` in non-interactive environments                                |
+| Demo data cannot be added                 | Demo data requires an empty database                                       |
+| Dataset missing                           | Run `python -m src.main dataset generate`                                  |
+| Time block overlaps another block         | Choose another time or edit/delete the conflicting block                   |
+
+---
+
+# Non-Functional Requirements
+
+FocusFlow ML is designed with the following non-functional requirements:
+
+### Performance
+
+Normal CLI operations should remain responsive for the intended local dataset size.
+
+### Reliability
+
+Invalid operations should not corrupt stored application data.
+
+### Maintainability
+
+Application logic, database access, ML processing, analytics, and CLI handling are separated into modular components.
+
+### Usability
+
+Commands provide help information, clear input requirements, validation messages, and useful errors.
+
+### Resource Efficiency
+
+The complete system runs locally on a standard computer without requiring GPU acceleration.
+
+### Error Handling
+
+Expected invalid inputs and application failures are handled explicitly instead of being silently ignored.
+
+---
+
+# Limitations
+
+### Synthetic Training Data
+
+The shipped ML model is trained using synthetic data.
+
+Its reported metrics demonstrate that the implemented ML pipeline functions correctly, but they do not establish real-world prediction accuracy.
+
+### Single Local User
+
+The current CLI is designed for one local user.
+
+### Time Blocks
+
+Time blocks must begin and end on the same day and cannot cross midnight.
+
+### Fixed Hyperparameters
+
+The current implementation uses fixed model hyperparameters rather than automated hyperparameter optimization.
+
+### Prediction Uncertainty
+
+The current prediction output uses the test MAE as an indication of typical model error rather than providing a formal prediction interval for each individual prediction.
+
+### Self-Reported Productivity
+
+The productivity score is self-reported. A model trained on real user records therefore learns the user's own scoring behavior.
+
+### Model Compatibility
+
+Persisted scikit-learn models may require retraining after incompatible scikit-learn version changes.
+
+---
+
+# Future Enhancements
+
+Potential future improvements include:
+
+* Hyperparameter optimization using time-series cross-validation
+* Additional regression algorithms such as gradient-boosted trees
+* Prediction intervals
+* Permutation feature importance
+* Partial-dependence analysis
+* Recurring time-block templates
+* Weekly habit targets
+* CSV import/export
+* Multi-user support
+* External calendar integration
+* Optional lightweight local web interface
+
+---
+
+# Academic Context
+
+FocusFlow ML was developed for the **VITyarthi Build Your Own Project** evaluation under the **Fundamentals of AI & ML** subject.
+
+The project applies the subject's fundamental machine learning concepts to a practical productivity-management problem.
+
+The implementation demonstrates:
+
+```text
+Problem Definition
+       ↓
+Data Collection / Generation
+       ↓
+Data Validation
+       ↓
+Data Cleaning
+       ↓
+Feature Engineering
+       ↓
+Supervised Learning
+       ↓
+Model Training
+       ↓
+Cross-Validation
+       ↓
+Model Evaluation
+       ↓
+Model Selection
+       ↓
+Prediction
+       ↓
+Analysis & Visualization
+```
+
+The project also follows a modular software architecture with database persistence, validation, testing, command-line execution, and reproducible machine-learning experiments.
+
+---
+
+# Additional Documentation
+
+Further project documentation is available in:
+
+* [`statement.md`](statement.md) — problem statement, scope, target users and high-level features
+* [`docs/ml_design.md`](docs/ml_design.md) — ML methodology, feature sets, leakage policy, model selection and evaluation
+* [`data/seed/README.md`](data/seed/README.md) — synthetic dataset generation and column descriptions
+* [`src/database/schema.sql`](src/database/schema.sql) — SQLite database schema
+
+---
+
+# References
+
+The project uses the official documentation and resources associated with:
+
+* Python
+* NumPy
+* Pandas
+* Scikit-learn
+* Matplotlib
+* SQLite
+* Joblib
+* Pytest
+
+Specific ML design and implementation references are documented in [`docs/ml_design.md`](docs/ml_design.md).
+
+---
+
+## License
+
+This project was developed for academic and educational purposes.
